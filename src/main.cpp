@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     static struct option longOptions[] = {
         {"client",  required_argument, 0, 0},
         {"server",  no_argument,       0, 0},
-        {"port",    required_argument, 0, 0},
+        {"port",    optional_argument, 0, 0},
         {"help",    no_argument,       0, 0}
     };
 

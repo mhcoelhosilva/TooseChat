@@ -113,23 +113,22 @@ bool Client::Update()
     std::cout << ">";
     std::string data;
     std::getline(std::cin, data);
-
-    if (data == "exit")
+    if (!data.empty())
     {
-        return false;
-    }
+        if (data == "exit")
+            return false;
 
-    // Send an initial buffer
-    iResult = send(m_connectSocket, data.c_str(), data.length(), 0);
-    if (iResult == SOCKET_ERROR) 
-    {
-        std::cerr << "send failed: " << WSAGetLastError() << std::endl;
-        closesocket(m_connectSocket);
-        WSACleanup();
-        return false;
+        // Send message
+        iResult = send(m_connectSocket, data.c_str(), data.length(), 0);
+        if (iResult == SOCKET_ERROR) 
+        {
+            std::cerr << "send failed: " << WSAGetLastError() << std::endl;
+            closesocket(m_connectSocket);
+            WSACleanup();
+            return false;
+        }
+        std::cout << "Bytes Sent: " << iResult << std::endl;
     }
-
-    std::cout << "Bytes Sent: " << iResult << std::endl;
 
     // Try to receive data
     iResult = recv(m_connectSocket, recvbuf, recvbuflen, 0);
