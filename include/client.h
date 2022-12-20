@@ -3,11 +3,14 @@
 
 #include <string>
 
+#include "encryption/blowfish.h"
+
 class Client
 {
 public:
     Client(std::string inHostName);
     Client(std::string inHostName, int inPortNumber);
+    Client(std::string inHostName, int inPortNumber, std::string inEncryptionKey);
 
     bool Initialize();
 
@@ -22,4 +25,7 @@ private:
     WSADATA m_wsaData;
 
     SOCKET m_connectSocket = INVALID_SOCKET;
+
+    std::string m_encryptionKey;
+    Blowfish m_blowfish;
 };

@@ -152,6 +152,30 @@ src/client.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\TooseChat.dir\build.make CMakeFiles/TooseChat.dir/src/client.cpp.s
 .PHONY : src/client.cpp.s
 
+src/encryption/blowfish.obj: src/encryption/blowfish.cpp.obj
+.PHONY : src/encryption/blowfish.obj
+
+# target to build an object file
+src/encryption/blowfish.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\TooseChat.dir\build.make CMakeFiles/TooseChat.dir/src/encryption/blowfish.cpp.obj
+.PHONY : src/encryption/blowfish.cpp.obj
+
+src/encryption/blowfish.i: src/encryption/blowfish.cpp.i
+.PHONY : src/encryption/blowfish.i
+
+# target to preprocess a source file
+src/encryption/blowfish.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\TooseChat.dir\build.make CMakeFiles/TooseChat.dir/src/encryption/blowfish.cpp.i
+.PHONY : src/encryption/blowfish.cpp.i
+
+src/encryption/blowfish.s: src/encryption/blowfish.cpp.s
+.PHONY : src/encryption/blowfish.s
+
+# target to generate assembly for a file
+src/encryption/blowfish.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\TooseChat.dir\build.make CMakeFiles/TooseChat.dir/src/encryption/blowfish.cpp.s
+.PHONY : src/encryption/blowfish.cpp.s
+
 src/main.obj: src/main.cpp.obj
 .PHONY : src/main.obj
 
@@ -212,6 +236,9 @@ help:
 	@echo ... src/client.obj
 	@echo ... src/client.i
 	@echo ... src/client.s
+	@echo ... src/encryption/blowfish.obj
+	@echo ... src/encryption/blowfish.i
+	@echo ... src/encryption/blowfish.s
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s

@@ -14,6 +14,7 @@ void commandLineHelp(std::string inProgramName, std::ostream& inOutputStream)
     inOutputStream << " --client <host-name>        = Run as client." << std::endl;
     inOutputStream << " --server                    = Run as server." << std::endl;
     inOutputStream << " --port <port-number>        = Port number to use." << std::endl;
+    inOutputStream << " --key <encryption-key>      = Encryption key to use." << std::endl;
     inOutputStream << " --help                      = See usage instructions." << std::endl;
 }
 
@@ -22,12 +23,14 @@ int main(int argc, char* argv[])
     bool runAsClient = false;
     std::string hostName = "";
     int portNumber = 27015;
+    std::string key = "aabb09182736ccdd";
 
-    const char* const shortOptions = "c:sp:h";
+    const char* const shortOptions = "c:sp::k::h";
     static struct option longOptions[] = {
         {"client",  required_argument, 0, 0},
         {"server",  no_argument,       0, 0},
         {"port",    optional_argument, 0, 0},
+        {"key",     optional_argument, 0, 0},
         {"help",    no_argument,       0, 0}
     };
 
@@ -56,6 +59,11 @@ int main(int argc, char* argv[])
             std::cout << "Port set to: " << portNumber << std::endl;
             break;
 
+        case 'k':
+            key = std::string(optarg);
+            std::cout << "Using encryption key: " << key << std::endl;
+            break;
+
         case 'h':
             commandLineHelp(argv[0], std::cout);
             break;
@@ -73,7 +81,7 @@ int main(int argc, char* argv[])
 
     if (runAsClient)
     {
-        Client c(hostName, portNumber);
+        Client c(hostName, portNumber, key);
         c.Initialize();
 
         while (c.Update())

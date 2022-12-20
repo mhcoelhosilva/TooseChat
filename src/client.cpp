@@ -4,16 +4,26 @@
 #include <string>
 
 Client::Client(std::string inHostName)
-: m_hostName(inHostName)
+    : m_hostName(inHostName),
+      m_blowfish(m_encryptionKey)
 {
 
 }
 
 Client::Client(std::string inHostName, int inPortNumber)
-: m_hostName(inHostName), 
-  m_portNumber(inPortNumber)
+    : m_hostName(inHostName), 
+      m_portNumber(inPortNumber),
+      m_blowfish(m_encryptionKey)
 {
 
+}
+
+Client::Client(std::string inHostName, int inPortNumber, std::string inEncryptionKey)
+    : m_hostName(inHostName), 
+      m_portNumber(inPortNumber),
+      m_encryptionKey(inEncryptionKey),
+      m_blowfish(inEncryptionKey)
+{
 }
 
 bool Client::Initialize()
@@ -111,15 +121,24 @@ bool Client::Update()
     // TODO: add client usernames to message and display on receiving
 
     std::cout << ">";
-    std::string data;
-    std::getline(std::cin, data);
-    if (!data.empty())
+    std::string inputStr;
+    std::getline(std::cin, inputStr);
+    if (!inputStr.empty())
     {
-        if (data == "exit")
+        inputStr = inputStr.substr(0, 512);
+        if (inputStr == "exit")
             return false;
 
+        // encrypt message
+        char cStr[512];
+        strcpy(cStr, inputStr.c_str());
+        if (!m_encryptionKey.empty())
+        {
+            m_blowfish.encrypt(cStr, cStr, sizeof(cStr));
+        }
+
         // Send message
-        iResult = send(m_connectSocket, data.c_str(), data.length(), 0);
+        iResult = send(m_connectSocket, cStr, strlen(cStr), 0);
         if (iResult == SOCKET_ERROR) 
         {
             std::cerr << "send failed: " << WSAGetLastError() << std::endl;
@@ -134,8 +153,13 @@ bool Client::Update()
     iResult = recv(m_connectSocket, recvbuf, recvbuflen, 0);
     if (iResult > 0)
     {
-        std::cout << "Bytes received: " << iResult << std::endl;
-        std::cout << "Received: " << recvbuf << std::endl;
+        // decrypt message
+        if (!m_encryptionKey.empty())
+        {
+            m_blowfish.decrypt(recvbuf, recvbuf, recvbuflen);
+        }
+
+        std::cout << "Received decrypted: " << recvbuf << std::endl;
     }
     else if (iResult == 0)
     {

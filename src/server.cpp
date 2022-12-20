@@ -6,7 +6,7 @@
 #include <iostream>
 
 Server::Server(int inPortNumber)
-: m_portNumber(inPortNumber)
+    : m_portNumber(inPortNumber)
 {
 
 }

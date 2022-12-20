@@ -7,7 +7,7 @@ set( CMAKE_C_COMPILER "C:/msys64/mingw64/bin/gcc.exe" )
 
 project(TooseChat)
 
-set(SOURCES src/main.cpp src/client.cpp src/server.cpp)
+set(SOURCES src/main.cpp src/client.cpp src/server.cpp src/encryption/blowfish.cpp)
 add_executable(TooseChat ${SOURCES})
 if(WIN32)
   target_link_libraries(TooseChat wsock32 ws2_32)
