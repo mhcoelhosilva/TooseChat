@@ -207,8 +207,9 @@ Blowfish::Blowfish(const std::string& inKey)
     std::memcpy(m_S, initialS, sizeof(initialS));
 
     // XOR 32-bit parts of the key with initial subkeys P_1 ... P_18
+    static const int PLength = sizeof(m_P) / sizeof(uint32_t);
     int j = 0;
-    for (int i = 0; i < 18; i++) 
+    for (int i = 0; i < PLength; i++) 
     {
         char* p;
         uint32_t l = strtoul(m_key.substr(j, j + 8).c_str(), &p, 16);
@@ -223,26 +224,25 @@ Blowfish::Blowfish(const std::string& inKey)
     }
 
     // blowfish key expansion
-    static const int PLength = sizeof(m_P) / sizeof(uint32_t);
-	uint32_t l = 0x00, r = 0x00;
-	for (short i = 0; i < PLength; i += 2) 
+    uint32_t l = 0x00, r = 0x00;
+    for (short i = 0; i < PLength; i += 2) 
     {
-		blowfishEncrypt(&l, &r);
-		m_P[i] = l;
-		m_P[i+1] = r;
-	}
+        blowfishEncrypt(&l, &r);
+        m_P[i] = l;
+        m_P[i+1] = r;
+    }
 
     static const int SLength = sizeof(m_S) / sizeof(m_S[0]);
     static const int SWidth = sizeof(m_S[0]) / sizeof(m_S[0][0]);
-	for (short i = 0; i < SLength; i++) 
+    for (short i = 0; i < SLength; i++) 
     {
-		for (short j = 0; j < SWidth; j+=2) 
+        for (short j = 0; j < SWidth; j+=2) 
         {
-			blowfishEncrypt(&l, &r);
-			m_S[i][j] = l;
-			m_S[i][j+1] = r;
-		}
-	}
+        	blowfishEncrypt(&l, &r);
+        	m_S[i][j] = l;
+        	m_S[i][j+1] = r;
+        }
+    }
 }
 
 uint32_t Blowfish::f(uint32_t x) 
@@ -255,28 +255,28 @@ void Blowfish::blowfishEncrypt(uint32_t *L, uint32_t *R)
 {
     for (short r = 0; r < 16; r++) 
     {
-		*L ^= m_P[r];
-		*R ^= f(*L);
-		std::swap(*L, *R);
-	}
+        *L ^= m_P[r];
+        *R ^= f(*L);
+        std::swap(*L, *R);
+    }
 
-	std::swap(*L, *R);
-	*R ^= m_P[16];
-	*L ^= m_P[17];
+    std::swap(*L, *R);
+    *R ^= m_P[16];
+    *L ^= m_P[17];
 }
 
 void Blowfish::blowfishDecrypt(uint32_t *L, uint32_t *R) 
 {
-	for (short r = 17; r > 1; r--) 
+    for (short r = 17; r > 1; r--) 
     {
-		*L ^= m_P[r];
-		*R ^= f(*L);
-		std::swap(*L, *R);
-	}
+        *L ^= m_P[r];
+        *R ^= f(*L);
+        std::swap(*L, *R);
+    }
 	
     std::swap(*L, *R);
-	*R ^= m_P[1];
-	*L ^= m_P[0];
+    *R ^= m_P[1];
+    *L ^= m_P[0];
 }
 
 void Blowfish::encrypt(char* outDst, const char* inSrc, int inByteLength)
