@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\CppChat.dir/objects.a
-C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\CppChat.dir/objects.a @CMakeFiles\CppChat.dir\objects1
-C:\msys64\mingw64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\CppChat.dir/objects.a -Wl,--no-whole-archive -o CppChat.exe -Wl,--out-implib,libCppChat.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\CppChat.dir\linkLibs.rsp
