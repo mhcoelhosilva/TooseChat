@@ -19,4 +19,7 @@ private:
 
     SOCKET m_listenSocket = INVALID_SOCKET;
     SOCKET m_clientSocket = INVALID_SOCKET;
+
+    int m_bufLen = 512;
+    char m_recvBuf[512];
 };

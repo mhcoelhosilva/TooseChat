@@ -28,4 +28,8 @@ private:
 
     std::string m_encryptionKey;
     Blowfish m_blowfish;
+
+    int m_bufLen = 512;
+    char m_recvBuf[512];
+    char m_sendBuf[512];
 };

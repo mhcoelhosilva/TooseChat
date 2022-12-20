@@ -113,11 +113,6 @@ bool Client::Update()
 {
     int iResult;
 
-    // TODO: make length tweakable
-    // and limit message length on sending side
-    int recvbuflen = 512;
-    char recvbuf[512];
-
     // TODO: add client usernames to message and display on receiving
 
     std::cout << ">";
@@ -130,15 +125,15 @@ bool Client::Update()
             return false;
 
         // encrypt message
-        char cStr[512];
-        strcpy(cStr, inputStr.c_str());
+        memset(m_sendBuf, 0, m_bufLen);
+        strcpy(m_sendBuf, inputStr.c_str());
         if (!m_encryptionKey.empty())
         {
-            m_blowfish.encrypt(cStr, cStr, sizeof(cStr));
+            m_blowfish.encrypt(m_sendBuf, m_sendBuf, sizeof(m_sendBuf));
         }
 
         // Send message
-        iResult = send(m_connectSocket, cStr, strlen(cStr), 0);
+        iResult = send(m_connectSocket, m_sendBuf, sizeof(m_sendBuf), 0);
         if (iResult == SOCKET_ERROR) 
         {
             std::cerr << "send failed: " << WSAGetLastError() << std::endl;
@@ -150,16 +145,17 @@ bool Client::Update()
     }
 
     // Try to receive data
-    iResult = recv(m_connectSocket, recvbuf, recvbuflen, 0);
+    memset(m_recvBuf, 0, m_bufLen);
+    iResult = recv(m_connectSocket, m_recvBuf, m_bufLen, 0);
     if (iResult > 0)
     {
         // decrypt message
         if (!m_encryptionKey.empty())
         {
-            m_blowfish.decrypt(recvbuf, recvbuf, recvbuflen);
+            m_blowfish.decrypt(m_recvBuf, m_recvBuf, sizeof(m_recvBuf));
         }
 
-        std::cout << "Received decrypted: " << recvbuf << std::endl;
+        std::cout << "Received decrypted: " << m_recvBuf << std::endl;
     }
     else if (iResult == 0)
     {

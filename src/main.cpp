@@ -66,16 +66,16 @@ int main(int argc, char* argv[])
 
         case 'h':
             commandLineHelp(argv[0], std::cout);
-            break;
+            return 0;
 
         case '?': // Unrecognized option
             std::cerr << "Unrecognized option" << std::endl;
             commandLineHelp(argv[0], std::cerr);
-            break;
+            return 0;
 
         default:
             commandLineHelp(argv[0], std::cerr);
-            break;
+            return 0;
         }
     }
 

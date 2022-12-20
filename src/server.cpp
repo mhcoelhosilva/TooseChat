@@ -125,21 +125,19 @@ bool Server::Update()
         }
     }
 
-    // TODO: set default buffer len, which will need to be same for clients
-    char recvbuf[512];
     int iResult, iSendResult;
-    int recvbuflen = 512;
 
     // Receive until the peer shuts down the connection
-    iResult = recv(m_clientSocket, recvbuf, recvbuflen, 0);
+    memset(m_recvBuf, 0, m_bufLen);
+    iResult = recv(m_clientSocket, m_recvBuf, m_bufLen, 0);
     if (iResult > 0) 
     {
         std::cout << "Bytes received: " << iResult << std::endl;
-        std::cout << "Received: " << recvbuf << std::endl;
+        std::cout << "Received: " << m_recvBuf << std::endl;
 
         // For now, just echo the buffer back to the sender
         // TODO: send to destination
-        iSendResult = send(m_clientSocket, recvbuf, iResult, 0);
+        iSendResult = send(m_clientSocket, m_recvBuf, m_bufLen, 0);
         if (iSendResult == SOCKET_ERROR) 
         {
             std::cerr << "send failed: " << WSAGetLastError() << std::endl;
