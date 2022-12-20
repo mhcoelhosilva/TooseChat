@@ -6,7 +6,7 @@ Here's the feature wishlist:
 
 + Basic command-line interface
 + Client-to-client messaging
-+ Message encryption
++ Message encryption (Blowfish algorithm)
 + Automated performance testing in Python
 
 And a few stretch goals:

@@ -120,7 +120,7 @@ bool Client::Update()
     std::getline(std::cin, inputStr);
     if (!inputStr.empty())
     {
-        inputStr = inputStr.substr(0, 512);
+        inputStr = inputStr.substr(0, m_bufLen - 1);
         if (inputStr == "exit")
             return false;
 
