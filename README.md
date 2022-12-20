@@ -16,21 +16,21 @@ And a few stretch goals:
 
 ## Basic Build Instructions
 
-In the main project directory, create a 'build' directory and enter it. Then, to configure the build in the shell:
+In the main project directory, create a `build` directory and enter it. Then, to configure the build in the shell:
 
-'cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug'
+`cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug`
 
 or
 
-'cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release'
+`cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
 
 Then build with CMake. The project has been set up for VSCode.
 
 ## Basic Usage Instructions
 
-Running 'TooseChat.exe --help' from the commandline will give you the following usage information:
+Running `TooseChat.exe --help` from the commandline will give you the following usage information:
 
-'''
+```
 Usage:
 TooseChat.exe [options]
 
@@ -40,6 +40,6 @@ Options:
  --port <port-number>        = Port number to use.
  --key <encryption-key>      = Encryption key to use.
  --help                      = See usage instructions.
-'''
+```
 
-The basic use case for testing is to run one local instance of the server with 'TooseChat.exe' or 'TooseChat.exe -s' (default port) and one local instance of the client with 'TooseChat.exe -c localhost' (default port and encryption key).
+The basic use case for testing is to run one local instance of the server with `TooseChat.exe` or `TooseChat.exe -s` (default port) and one local instance of the client with `TooseChat.exe -c localhost` (default port and encryption key).
