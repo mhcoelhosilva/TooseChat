@@ -8,7 +8,6 @@
 Server::Server(int inPortNumber)
     : m_portNumber(inPortNumber)
 {
-
 }
 
 bool Server::Initialize()
@@ -17,8 +16,8 @@ bool Server::Initialize()
     m_clientSockets.clear();
 
     // Initialize Winsock
-    int iResult = WSAStartup(MAKEWORD(2,2), &m_wsaData);
-    if (iResult != 0) 
+    int iResult = WSAStartup(MAKEWORD(2, 2), &m_wsaData);
+    if (iResult != 0)
     {
         std::cerr << "WSAStartup failed: " << iResult << std::endl;
         return false;
@@ -29,11 +28,11 @@ bool Server::Initialize()
                     *addrPtr = NULL,
                     hints;
 
-    ZeroMemory( &hints, sizeof(hints) );
+    ZeroMemory(&hints, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
-    // AI_PASSIVE indicates the caller intends to use the returned 
+    // AI_PASSIVE indicates the caller intends to use the returned
     // socket address structure in a call to the bind function (server only)
     hints.ai_flags = AI_PASSIVE;
 
@@ -58,7 +57,7 @@ bool Server::Initialize()
 
     m_listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-    if (m_listenSocket == INVALID_SOCKET) 
+    if (m_listenSocket == INVALID_SOCKET)
     {
         std::cerr << "Error at socket(): " << WSAGetLastError() << std::endl;
         freeaddrinfo(result);
@@ -67,12 +66,12 @@ bool Server::Initialize()
     }
 
     BOOL bOptVal = TRUE;
-    iResult = setsockopt(m_listenSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &bOptVal, sizeof(bOptVal));
-    if (iResult == SOCKET_ERROR) 
+    iResult = setsockopt(m_listenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&bOptVal, sizeof(bOptVal));
+    if (iResult == SOCKET_ERROR)
     {
         std::cerr << "setsockopt for SO_REUSEADDR failed with error: " << WSAGetLastError() << std::endl;
-        closesocket(m_listenSocket);
-        WSACleanup();
+        freeaddrinfo(result);
+        CloseListenSocket();
         return false;
     }
 
@@ -81,54 +80,59 @@ bool Server::Initialize()
     if (ioctlsocket(m_listenSocket, FIONBIO, &nonBlocking) == SOCKET_ERROR)
     {
         std::cerr << "ioctlsocket failed with error: " << WSAGetLastError() << std::endl;
-        closesocket(m_listenSocket);
-        WSACleanup();
+        freeaddrinfo(result);
+        CloseListenSocket();
         return false;
     }
 
     BOOL noDelay = TRUE;
-    if (setsockopt(m_listenSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&noDelay, sizeof(noDelay)))
+    if (setsockopt(m_listenSocket, IPPROTO_TCP, TCP_NODELAY, (const char *)&noDelay, sizeof(noDelay)))
     {
         std::cerr << "setsockopt failed with error: " << WSAGetLastError() << std::endl;
-        closesocket(m_listenSocket);
-        WSACleanup();
+        freeaddrinfo(result);
+        CloseListenSocket();
         return false;
     }
 
     // Setup the TCP listening socket
     iResult = bind(m_listenSocket, result->ai_addr, (int)result->ai_addrlen);
-    if (iResult == SOCKET_ERROR) 
+    if (iResult == SOCKET_ERROR)
     {
         std::cerr << "bind failed with error: " << WSAGetLastError() << std::endl;
         freeaddrinfo(result);
-        closesocket(m_listenSocket);
-        WSACleanup();
+        CloseListenSocket();
         return false;
     }
 
     // addr info no longer needed, free result
     freeaddrinfo(result);
 
-    // The backlog parameter is set to SOMAXCONN. This value is a special constant that instructs 
+    // The backlog parameter is set to SOMAXCONN. This value is a special constant that instructs
     // the Winsock provider for this socket to allow a maximum reasonable number of pending connections in the queue.
-    if (listen(m_listenSocket, SOMAXCONN ) == SOCKET_ERROR ) 
+    if (listen(m_listenSocket, SOMAXCONN) == SOCKET_ERROR)
     {
         std::cerr << "Listen failed with error: " << WSAGetLastError() << std::endl;
-        closesocket(m_listenSocket);
-        WSACleanup();
+        freeaddrinfo(result);
+        CloseListenSocket();
         return false;
     }
 
     WSAPOLLFD listeningSocketFD = {};
-	listeningSocketFD.fd = m_listenSocket;
-	listeningSocketFD.events = POLLRDNORM;
-	listeningSocketFD.revents = 0;
+    listeningSocketFD.fd = m_listenSocket;
+    listeningSocketFD.events = POLLRDNORM;
+    listeningSocketFD.revents = 0;
     m_socketFileDescriptors.push_back(listeningSocketFD);
 
     return true;
 }
 
-void Server::CloseConnection(int inConnectionIndex, std::string&& inReason)
+void Server::CloseListenSocket()
+{
+    closesocket(m_listenSocket);
+    WSACleanup();
+}
+
+void Server::CloseConnection(int inConnectionIndex, std::string &&inReason)
 {
     if (inConnectionIndex >= m_clientSockets.size())
     {
@@ -136,15 +140,15 @@ void Server::CloseConnection(int inConnectionIndex, std::string&& inReason)
         return;
     }
 
-	SOCKET clientSocket = m_clientSockets[inConnectionIndex];
+    SOCKET clientSocket = m_clientSockets[inConnectionIndex];
     int errorCode = WSAGetLastError();
-	std::cout << "[" << inReason << "][Error code: " << errorCode;
+    std::cout << "[" << inReason << "][Error code: " << errorCode;
     std::cout << "] Connection lost with client socket " << clientSocket << "." << std::endl;
 
-	m_socketFileDescriptors.erase(m_socketFileDescriptors.begin() + (inConnectionIndex + 1));
-	m_tempFileDescs.erase(m_tempFileDescs.begin() + (inConnectionIndex + 1));
-	closesocket(m_clientSockets[inConnectionIndex]);
-	m_clientSockets.erase(m_clientSockets.begin() + inConnectionIndex);
+    m_socketFileDescriptors.erase(m_socketFileDescriptors.begin() + (inConnectionIndex + 1));
+    m_tempFileDescs.erase(m_tempFileDescs.begin() + (inConnectionIndex + 1));
+    closesocket(m_clientSockets[inConnectionIndex]);
+    m_clientSockets.erase(m_clientSockets.begin() + inConnectionIndex);
 }
 
 bool Server::Update()
@@ -154,14 +158,14 @@ bool Server::Update()
     m_tempFileDescs = m_socketFileDescriptors;
 
     if (WSAPoll(m_tempFileDescs.data(), m_tempFileDescs.size(), 1) > 0)
-	{
+    {
         // Listening
 
-        WSAPOLLFD& listeningSocketFD = m_tempFileDescs[0];
-		if (listeningSocketFD.revents & POLLRDNORM)
+        WSAPOLLFD &listeningSocketFD = m_tempFileDescs[0];
+        if (listeningSocketFD.revents & POLLRDNORM)
         {
             SOCKET newClientSocket = accept(m_listenSocket, NULL, NULL); //&clientAddr, &clientAddrLen);
-            if (newClientSocket == INVALID_SOCKET) 
+            if (newClientSocket == INVALID_SOCKET)
             {
                 std::cerr << "accept failed: " << WSAGetLastError() << std::endl;
             }
@@ -173,11 +177,11 @@ bool Server::Update()
                 WSAPOLLFD newConnectionFD = {};
                 newConnectionFD.fd = newClientSocket;
                 newConnectionFD.events = POLLRDNORM | POLLWRNORM;
-	            newConnectionFD.revents = 0;
+                newConnectionFD.revents = 0;
                 m_socketFileDescriptors.push_back(newConnectionFD);
 
                 // add to send queue
-                char* newSendBuf = new char[m_bufLen];
+                char *newSendBuf = new char[m_bufLen];
                 std::string welcome = "Welcome!";
                 memset(newSendBuf, 0, m_bufLen);
                 memcpy(newSendBuf, welcome.c_str(), strlen(welcome.c_str()));
@@ -190,65 +194,64 @@ bool Server::Update()
         for (int i = m_tempFileDescs.size() - 1; i >= 1; --i)
         {
             int connectionIndex = i - 1;
-			SOCKET connectionSocket = m_clientSockets[connectionIndex];
+            SOCKET connectionSocket = m_clientSockets[connectionIndex];
 
-            if (m_tempFileDescs[i].revents & POLLERR) //If error occurred on this socket
-			{
+            if (m_tempFileDescs[i].revents & POLLERR) // If error occurred on this socket
+            {
                 CloseConnection(connectionIndex, "POLLERR");
-				continue;
-			}
+                continue;
+            }
 
-			if (m_tempFileDescs[i].revents & POLLHUP) //If poll hangup occurred on this socket
-			{
+            if (m_tempFileDescs[i].revents & POLLHUP) // If poll hangup occurred on this socket
+            {
                 CloseConnection(connectionIndex, "POLLHUP");
-				continue;
-			}
+                continue;
+            }
 
-			if (m_tempFileDescs[i].revents & POLLNVAL) //If invalid socket
-			{
+            if (m_tempFileDescs[i].revents & POLLNVAL) // If invalid socket
+            {
                 CloseConnection(connectionIndex, "POLLNVAL");
-				continue;
-			}
+                continue;
+            }
 
-			if (m_tempFileDescs[i].revents & POLLRDNORM) //If normal data can be read without blocking
-			{
-				memset(m_recvBufs[connectionIndex], 0, m_bufLen);
+            if (m_tempFileDescs[i].revents & POLLRDNORM) // If normal data can be read without blocking
+            {
+                memset(m_recvBufs[connectionIndex], 0, m_bufLen);
                 int iResult = recv(m_clientSockets[connectionIndex], m_recvBufs[connectionIndex], m_bufLen, 0);
 
-                if (iResult > 0) 
+                if (iResult > 0)
                 {
                     std::cout << "Bytes received: " << iResult << std::endl;
                     std::cout << "Received: " << m_recvBufs[connectionIndex] << std::endl;
 
                     // add to send queue
-                    char* newSendBuf = new char[m_bufLen];
+                    char *newSendBuf = new char[m_bufLen];
                     memcpy(newSendBuf, m_recvBufs[connectionIndex], m_bufLen);
                     m_sendBufs.push(newSendBuf);
-                } 
+                }
                 else if (iResult == 0)
                 {
                     CloseConnection(connectionIndex, "Recv==0");
-					continue;
+                    continue;
                 }
 
-				if (iResult == SOCKET_ERROR) //If error occurred on socket
-				{
-					int error = WSAGetLastError();
-					if (error != WSAEWOULDBLOCK)
-					{
-						CloseConnection(connectionIndex, "Recv<0");
-						continue;
-					}
-				}
+                if (iResult == SOCKET_ERROR) // If error occurred on socket
+                {
+                    int error = WSAGetLastError();
+                    if (error != WSAEWOULDBLOCK)
+                    {
+                        CloseConnection(connectionIndex, "Recv<0");
+                        continue;
+                    }
+                }
+            }
 
-			}
-
-            if (m_tempFileDescs[i].revents & POLLWRNORM) //If normal data can be written without blocking
+            if (m_tempFileDescs[i].revents & POLLWRNORM) // If normal data can be written without blocking
             {
                 if (m_sendBufs.empty())
                     continue;
 
-                char* sendBuf = m_sendBufs.front();
+                char *sendBuf = m_sendBufs.front();
 
                 // For now, just echo the buffer back to the sender
                 // TODO: send to destination
@@ -259,15 +262,13 @@ bool Server::Update()
                     delete[] sendBuf;
                     m_sendBufs.pop();
                 }
-                if (iSendResult == SOCKET_ERROR) 
+                if (iSendResult == SOCKET_ERROR)
                 {
                     std::cerr << "Send failed with error code: " << WSAGetLastError() << "." << std::endl;
                     continue;
                 }
             }
         }
-
-
     }
 
     return true;
@@ -276,7 +277,7 @@ bool Server::Update()
 bool Server::Shutdown()
 {
     // clean up receive buffers
-    for (auto& b : m_recvBufs)
+    for (auto &b : m_recvBufs)
     {
         delete[] b;
     }
@@ -287,19 +288,18 @@ bool Server::Shutdown()
         if (m_clientSockets[i] != INVALID_SOCKET)
         {
             int iResult = shutdown(m_clientSockets[i], SD_SEND);
-            if (iResult == SOCKET_ERROR) 
+            if (iResult == SOCKET_ERROR)
             {
                 std::cerr << "shutdown failed: " << WSAGetLastError() << std::endl;
                 closesocket(m_clientSockets[i]);
-                WSACleanup();
-                return false;
             }
         }
 
         // cleanup
         closesocket(m_clientSockets[i]);
-        WSACleanup();
     }
+
+    CloseListenSocket();
 
     return true;
 }

@@ -19,6 +19,7 @@ public:
     bool Shutdown();
 
     void CloseConnection(int inConnectionIndex, std::string&& inReason);
+    void CloseListenSocket();
 
 private:
     int m_portNumber = 27015;
