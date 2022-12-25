@@ -5,8 +5,10 @@ This is an experiment in making a basic chat application in C++ using Winsock. T
 Here's the feature wishlist:
 
 + Basic command-line interface
-+ Client-to-client messaging
-+ Message encryption (Blowfish algorithm)
++ Non-blocking winsock server
++ Non-blocking client-to-client messaging
++ End-to-end message encryption (Blowfish algorithm)
++ Diffie–Hellman key exchange
 + Automated performance testing in Python
 
 And a few stretch goals:
