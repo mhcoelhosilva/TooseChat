@@ -84,10 +84,7 @@ int main(int argc, char* argv[])
         Client c(hostName, portNumber, key);
         c.Initialize();
 
-        while (c.Update())
-        {
-            //Sleep(10);
-        }
+        while (c.Update()) {}
 
         c.Shutdown();
     }
@@ -97,10 +94,7 @@ int main(int argc, char* argv[])
 
         s.Initialize();
 
-        while (s.Update())
-        {
-            //Sleep(10);
-        }
+        while (s.Update()) {}
 
         s.Shutdown();
     }

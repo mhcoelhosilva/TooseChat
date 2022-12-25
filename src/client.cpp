@@ -87,8 +87,7 @@ bool Client::Initialize()
         if (setsockopt(m_connectSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&noDelay, sizeof(noDelay)))
         {
             std::cerr << "setsockopt failed with error: " << WSAGetLastError() << std::endl;
-            closesocket(m_connectSocket);
-            WSACleanup();
+            CloseConnection();
             return false;
         }
 
@@ -96,8 +95,7 @@ bool Client::Initialize()
         if (setsockopt(m_connectSocket, SOL_SOCKET, SO_KEEPALIVE, (const char*)&keepAlive, sizeof(keepAlive)))
         {
             std::cerr << "setsockopt failed with error: " << WSAGetLastError() << std::endl;
-            closesocket(m_connectSocket);
-            WSACleanup();
+            CloseConnection();
             return false;
         }
 
@@ -118,8 +116,7 @@ bool Client::Initialize()
             if (ioctlsocket(m_connectSocket, FIONBIO, &nonBlocking) == SOCKET_ERROR)
             {
                 std::cerr << "ioctlsocket failed with error: " << WSAGetLastError() << std::endl;
-                closesocket(m_connectSocket);
-                WSACleanup();
+                CloseConnection();
                 return false;
             }
         }
@@ -149,8 +146,8 @@ bool Client::Update()
     // TODO: add client usernames to message and display on receiving
     static Utils::AsyncGetline asyncGL;
     std::string inputStr = asyncGL.getLine();
-    static bool recvd = false;
-    if (!inputStr.empty() && recvd)
+    static bool receivedWelcomeMessage = false;
+    if (!inputStr.empty() && receivedWelcomeMessage)
     {
         inputStr = inputStr.substr(0, m_bufLen - 1);
         if (inputStr == "exit")
@@ -212,21 +209,19 @@ bool Client::Update()
 
                 std::cout << "Received decrypted: " << m_recvBuf << std::endl;
                 std::cout << ">";
-                recvd = true;
+                receivedWelcomeMessage = true;
             }
             else if (iResult == 0)
             {
                 std::cout << "Connection closed" << std::endl;
-                closesocket(m_connectSocket);
-                WSACleanup();
+                CloseConnection();
                 return false;
             }
             
             if (iResult == SOCKET_ERROR)
             {
                 std::cerr << "recv failed: " << WSAGetLastError() << std::endl;
-                closesocket(m_connectSocket);
-                WSACleanup();
+                CloseConnection();
                 return false;
             }
 
@@ -252,16 +247,20 @@ bool Client::Update()
             if (iResult == SOCKET_ERROR) 
             {
                 std::cerr << "send failed: " << WSAGetLastError() << std::endl;
-                closesocket(m_connectSocket);
-                WSACleanup();
+                CloseConnection();
                 return false;
             }
 
-            
         }
     }
 
     return true;
+}
+
+void Client::CloseConnection()
+{
+    closesocket(m_connectSocket);
+    WSACleanup();
 }
 
 bool Client::Shutdown()
@@ -272,8 +271,7 @@ bool Client::Shutdown()
     if (iResult == SOCKET_ERROR) 
     {
         std::cerr << "shutdown failed: " << WSAGetLastError() << std::endl;
-        closesocket(m_connectSocket);
-        WSACleanup();
+        CloseConnection();
         return false;
     }
 

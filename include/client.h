@@ -20,6 +20,7 @@ public:
 
     bool Update();
 
+    void CloseConnection();
     bool Shutdown();
 
 private:

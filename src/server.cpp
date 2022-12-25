@@ -153,6 +153,13 @@ void Server::CloseConnection(int inConnectionIndex, std::string &&inReason)
 
 bool Server::Update()
 {
+    static Utils::AsyncGetline asyncGL;
+    std::string inputStr = asyncGL.getLine();
+    if (inputStr == "exit")
+    {
+        return false;
+    }
+
     // use temp variable so as to not corrupt member vector
     // (so we don't have to reset revents every time before calling WSAPoll())
     m_tempFileDescs = m_socketFileDescriptors;
@@ -222,7 +229,6 @@ bool Server::Update()
                 if (iResult > 0)
                 {
                     std::cout << "Bytes received: " << iResult << std::endl;
-                    std::cout << "Received: " << m_recvBufs[connectionIndex] << std::endl;
 
                     // add to send queue
                     char *newSendBuf = new char[m_bufLen];
