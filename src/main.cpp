@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 
         while (c.Update())
         {
-            Sleep(10);
+            //Sleep(10);
         }
 
         c.Shutdown();
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
         while (s.Update())
         {
-            Sleep(10);
+            //Sleep(10);
         }
 
         s.Shutdown();

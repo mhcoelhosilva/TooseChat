@@ -1,3 +1,5 @@
+#pragma once
+
 #include "encryption.h"
 
 class Blowfish : public Encryption

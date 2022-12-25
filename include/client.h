@@ -1,9 +1,13 @@
+#pragma once
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
 #include <string>
+#include <queue>
 
 #include "encryption/blowfish.h"
+#include "utils.h"
 
 class Client
 {
@@ -31,5 +35,5 @@ private:
 
     int m_bufLen = 512;
     char m_recvBuf[512];
-    char m_sendBuf[512];
+    std::queue<char*> m_sendBufs;
 };
