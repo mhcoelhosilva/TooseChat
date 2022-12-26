@@ -13,7 +13,6 @@ public:
 
     bool Initialize();
 
-    bool MultiThreadUpdate(int inIdx);
     bool Update();
 
     bool Shutdown();
