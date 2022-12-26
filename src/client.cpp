@@ -156,7 +156,7 @@ bool Client::Update()
         memcpy(newSendBuf, inputStr.c_str(), strlen(inputStr.c_str()));
         if (!m_encryptionKey.empty())
         {
-            m_blowfish.encrypt(newSendBuf, newSendBuf, sizeof(newSendBuf));
+            m_blowfish.encrypt(newSendBuf, newSendBuf, m_bufLen);
         }
         // add to send queue
         m_sendBufs.push(newSendBuf);
@@ -197,9 +197,9 @@ bool Client::Update()
             if (iResult > 0)
             {
                 // decrypt message
-                if (!m_encryptionKey.empty() && !receivedWelcomeMessage)
+                if (!m_encryptionKey.empty() && receivedWelcomeMessage)
                 {
-                    m_blowfish.decrypt(m_recvBuf, m_recvBuf, sizeof(m_recvBuf));
+                    m_blowfish.decrypt(m_recvBuf, m_recvBuf, m_bufLen);
                 }
 
                 std::cout << "Received decrypted: " << m_recvBuf << std::endl;
