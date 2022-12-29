@@ -5,12 +5,16 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <vector>
+#include <cstdlib>
 
 namespace Utils
 {
     using namespace std;
 
+    // --- AsyncGetline ---
     // credit: https://stackoverflow.com/users/1599699/andrew
+
     class AsyncGetline
     {
     public:
@@ -33,5 +37,20 @@ namespace Utils
 
         //string utilized safely by each thread due to the inputLock mutex.
         string input;
+    };
+
+    // --- PrimeNumberGenerator ---
+
+    class PrimeNumberGenerator
+    {
+    public:
+        uint64_t GetRandomPrimeNumber(uint64_t inRangeEnd = 100);
+
+    private:
+        void GeneratePrimes(uint64_t inSearchUntil);
+
+        vector<uint64_t> m_primes;
+        bool m_generatedPrimes = false;
+        uint64_t m_searchedUntil = 0;
     };
 };

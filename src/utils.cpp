@@ -1,7 +1,14 @@
 #include "utils.h"
 
+#include <random>
+#include <algorithm>
+#include <iostream>
+
 namespace Utils
 {
+    // --- AsyncGetline ---
+    // credit: https://stackoverflow.com/users/1599699/andrew
+
     //AsyncGetline is a class that allows for asynchronous CLI getline-style input
     //(with 0% CPU usage!), which normal iostream usage does not easily allow.
     AsyncGetline::AsyncGetline()
@@ -115,5 +122,53 @@ namespace Utils
         }
 
         return result;
+    }
+
+    // --- PrimeNumberGenerator ---
+
+    void PrimeNumberGenerator::GeneratePrimes(uint64_t inSearchUntil)
+    {
+        // Using Sieve of Eratosthenes (https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
+        // O(n log log n)
+
+        if (m_generatedPrimes && m_searchedUntil >= inSearchUntil)
+            return;
+
+        uint64_t n = inSearchUntil;
+
+        // A represents ints 2 through n
+        std::vector<bool> A(n - 1, true);
+
+        for (uint64_t i = 2; i * i < n; ++i)
+            if (A[i - 2] == true)
+                for (uint64_t j = i * i; j < n; j += i)
+                    A[j - 2] = false;
+
+        m_primes.clear();
+        for (uint64_t i = 0; i < A.size(); ++i)
+            if (A[i] == true)
+                m_primes.push_back(i + 2);
+
+        m_generatedPrimes = true;
+        m_searchedUntil = inSearchUntil;
+    }
+
+    uint64_t PrimeNumberGenerator::GetRandomPrimeNumber(uint64_t inEndRange /*= 100*/)
+    {
+        GeneratePrimes(inEndRange);
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distr(0, m_primes.size() - 1);
+
+        int randomIndex = distr(gen);
+        if (randomIndex < 0 || randomIndex >= m_primes.size())
+        {
+            std::cerr << "Random index " << randomIndex;
+            std::cerr << " out of m_primes range (n = " << m_primes.size() << ")." << std::endl;
+            return -1;
+        }
+
+        return m_primes[randomIndex];
     }
 };

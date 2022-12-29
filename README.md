@@ -10,6 +10,7 @@ Here's the feature wishlist:
 + End-to-end message encryption (Blowfish algorithm)
 + Diffie–Hellman key exchange
 + Automated performance testing in Python
++ Unit tests with GTest
 
 And a few stretch goals:
 
